@@ -6,8 +6,6 @@ FROM bitbus/paopao-ce-backend-builder:latest
 # 设置环境变量
 ARG API_HOST
 ARG USE_API_HOST=yes
-ARG EMBED_UI=yes
-ARG USE_DIST=no
 ENV TZ=Asia/Shanghai
 
 # 设置工作目录

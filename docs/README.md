@@ -10,7 +10,7 @@
 ### 环境要求
 
 * Go (1.20+)
-* MySQL (5.7+)
+* MySQL (8.0)
 * Redis 
 * MinIO 
 * MeiliSearch (1.4)
@@ -91,8 +91,6 @@ JH-Forum-Go
 │   └── xerror         // 错误处理工具
 ├── release            // 打包文件
 ├── script             // 脚本文件
-│   ├── systemd        // systemd 服务相关脚本
-│   │   └── jh-forum.service  // systemd 服务文件
 │   └── forum-mysql.sql // 初始化数据库的 SQL 脚本
 ├── .gitignore         // Git 忽略文件
 ├── .golangci.yml      // GolangCI-Lint 配置文件
@@ -115,25 +113,58 @@ JH-Forum-Go
 1. 导入项目根目录下的 `scripts/forum-mysql.sql` 文件至MySQL数据库
 2. 拷贝项目根目录下 `config.yaml.example` 文件至 `config.yaml`，按照注释完成配置`mysql、redis、meilisearch、minIO`
    
-3. * 编译后端获得可执行文件（打包）    
-   编译api服务:
-    ```sh
-    make build
-    ```
-   编译后在`release`目录可以找到对应可执行文件。
-    ```sh
-    release/JH-Forum
-    ```
-    再通过systemd作为服务，用nginx反向代理给，提供API给前端服务调用。
-
-
-   * 直接运行后端，作为后端测试使用（运行）    
+3. 直接运行后端，作为后端测试使用（运行）    
    运行api服务:
 ```sh
    make run
+   ## 或者
+   go run main.go
  ```
 
+4. 编译后端获得可执行文件（打包）    
+   编译api服务:
+    ```sh
+   ## 在linux环境下
+   make build
 
+   ## 在Windows环境(cmd)下
+   SET GOOS=linux
+   SET GOARCH=amd64
+   make linux-amd64
+    ```
+   编译后在`release`目录可以找到对应可执行文件。
+    ```sh
+   ## 在linux环境
+   release/JH-Forum
+   ## 在Windows环境
+   release/linux-amd64/JH-Forum-GO/JH-Forum
+    ``` 
+5. 项目部署方法
+* 本地部署
+后端服务使用 systemctl或supervisor 守护进程，并通过 nginx 反向代理后，提供API给前端服务调用。
+```
+systemctl start jh-forum
+```
+* docker部署
+可以通过脚本打包成镜像再运行该镜像
+```sh
+## 为脚本添加可执行权限
+chmod +x ./build-image.sh
+## 构建镜像
+./build-image.sh
+## 运行容器，直接docker部署至少要更改对应的mysql，redis，minio，meili的配置
+mkdir custom &&docker run -d   -p 8008:8008   -v ${PWD}/custom:/app/data/custom -v ${PWD}/config.yaml.example:/app/paopao-ce/config.yaml   --name jh-forum   zjutjh/jh-forum
+```
+* docker-compose 部署
+默认是使用config.yaml.example的配置，如果需要自定义配置，请拷贝默认配置文件(比如config.yaml)，修改后再同步配置到docker-compose.yaml
+```
+### 给予minio权限，不然minio容器会报错
+chmod -R 777 ./custom/data/minio/data
+### 启动
+docker compose up -d
+### 停止并删除容器
+docker compose down
+```
 
 
 #### 后端编写接口

@@ -1,0 +1,83 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: jh-forum
+      MYSQL_ROOT_PASSWORD: jhwl  # 使用 MYSQL_ROOT_PASSWORD 设置 root 用户密码
+    volumes:
+      - ./scripts/forum-mysql.sql:/docker-entrypoint-initdb.d/jh-forum.sql
+      - ./custom/data/mysql/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - JH-network
+
+  minio:
+    image: bitnami/minio:latest
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minio-root-user
+      MINIO_ROOT_PASSWORD: minio-root-password
+      MINIO_DEFAULT_BUCKETS: jh-forum:public
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - ./custom/data/minio/data:/data
+    networks:
+      - JH-network
+
+  redis:
+    image: redis/redis-stack:7.2.0-v2
+    restart: always
+    ports:
+      - 6379:6379
+      - 8001:8001
+    environment:
+      REDISEARCH_ARGS: "MAXSEARCHRESULTS 5"
+    networks:
+      - JH-network
+  
+  meili:
+    image: getmeili/meilisearch:v1.4
+    restart: always
+    ports:
+      - 7700:7700
+    volumes:
+      - ./custom/data/meili/data:/meili_data
+    environment:
+      - MEILI_MASTER_KEY=jh-meilisearch
+    networks:
+      - JH-network
+
+  # pyroscope:
+  #   image: pyroscope/pyroscope:latest
+  #   restart: always
+  #   ports:
+  #     - 4040:4040
+  #   command:
+  #     - 'server'
+  #   networks:
+  #     - JH-network
+
+  backend:
+    image: zjutjh/jh-forum:latest
+    restart: always
+    depends_on:
+      - db
+      - redis
+      - meili
+      - minio
+    # modify below to reflect your custom configure
+    volumes:
+      - ./config.yaml.example:/app/jh-forum/config.yaml
+      - ./custom:/app/jh-forum/custom
+    ports:
+      - 8008:8008
+    networks:
+      - JH-network
+
+networks:
+  JH-network:
+    driver: bridge

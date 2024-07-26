@@ -1,4 +1,4 @@
-.PHONY: all build build-web run test clean fmt pre-commit help
+.PHONY: all build run generate linux-amd64 test clean fmt pre-commit help
 
 PROJECT = JH-Forum-Go
 TARGET = JH-Forum
@@ -12,7 +12,7 @@ CGO_ENABLED := 1
 endif
 
 RELEASE_ROOT = release
-RELEASE_FILES = LICENSE README.md  config.yaml.example docker-compose.yaml scripts docs
+RELEASE_FILES = LICENSE README.md config.yaml.example docker-compose.yaml scripts docs
 RELEASE_LINUX_AMD64 = $(RELEASE_ROOT)/linux-amd64/$(PROJECT)
 RELEASE_DARWIN_AMD64 = $(RELEASE_ROOT)/darwin-amd64/$(PROJECT)
 RELEASE_DARWIN_ARM64 = $(RELEASE_ROOT)/darwin-arm64/$(PROJECT)
@@ -54,7 +54,8 @@ release: linux-amd64 darwin-amd64 darwin-arm64 windows-x64
 .PHONY: linux-amd64
 linux-amd64:
 	@echo Build JH-Forum [linux-amd64] CGO_ENABLED=$(CGO_ENABLED) TAGS="'$(TAGS)'"
-	@set "CGO_ENABLED=$(CGO_ENABLED)" && set "GOOS=linux" && set "GOARCH=amd64" && go build -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $(RELEASE_LINUX_AMD64)/$(TARGET_BIN)
+	@echo $(CGO_ENABLED) $(GOOS) $(GOARCH) 
+	@go build -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)'  -o $(RELEASE_LINUX_AMD64)/$(TARGET_BIN)
 
 .PHONY: darwin-amd64
 darwin-amd64:

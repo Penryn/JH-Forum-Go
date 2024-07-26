@@ -31,7 +31,7 @@ BigCacheIndex: # 使用BigCache缓存泡泡广场消息流
 Logger: # 日志通用配置
   Level: debug # 日志级别 panic|fatal|error|warn|info|debug|trace
 LoggerFile: # 使用File写日志
-  SavePath: custom/data/logs
+  SavePath: custom/data/jh-forum/logs
   FileName: app
   FileExt: .log
 LoggerMeili: # 使用Meili写日志
@@ -51,18 +51,18 @@ TweetSearch: # 推文关键字搜索相关配置
 Meili: # Meili搜索配置
   Host: meili:7700
   Index: jh-forum
-  ApiKey: 
+  ApiKey: jh-meilisearch
   Secure: False
 ObjectStorage: # 对象存储通用配置
   RetainInDays: 2   # 临时对象过期时间多少天
   TempDir: tmp      # 临时对象存放目录名
 MinIO: # MinIO 存储配置
-  AccessKey: root
-  SecretKey: 
-  Secure: true
-  Endpoint: 
-  Bucket: paopao
-  Domain: 
+  AccessKey: minio-root-user
+  SecretKey: minio-root-password
+  Secure: false
+  Endpoint: minio:9000
+  Bucket: jh-forum
+  Domain: 127.0.0.0 
 PprofServer: # Pprof服务
   RunMode: debug
   HttpIp: 127.0.0.1
@@ -79,18 +79,18 @@ Database: # Database通用配置
   TablePrefix: p_   # 表名前缀
 MySQL: # MySQL数据库
   Username: root
-  Password: 
-  Host: mysql:3306
-  DBName: paopao
+  Password: jhwl
+  Host: db:3306
+  DBName: jh-forum
   Charset: utf8mb4
   ParseTime: True
   MaxIdleConns: 10
   MaxOpenConns: 30
 Redis:
   InitAddress: redis:6379
-  Username: default
+  Username: 
   Password: 
-  SelectDB: 2
+  SelectDB: 0
   ConnWriteTimeout: 60 # 连接写超时时间 多少秒 默认 60秒
 WebProfile:
   UseFriendship: false              # 前端是否使用好友体系
