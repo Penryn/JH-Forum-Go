@@ -20,6 +20,7 @@ import (
 	"JH-Forum/internal/model/web"
 	"JH-Forum/internal/servants/base"
 	"JH-Forum/internal/servants/chain"
+	"JH-Forum/pkg/sensitive/Words"
 	"JH-Forum/pkg/xerror"
 	"github.com/sirupsen/logrus"
 )
@@ -309,6 +310,9 @@ func (s *coreSrv) SuggestUsers(req *web.SuggestUsersReq) (*web.SuggestUsersResp,
 func (s *coreSrv) ChangeNickname(req *web.ChangeNicknameReq) mir.Error {
 	if utf8.RuneCountInString(req.Nickname) < 2 || utf8.RuneCountInString(req.Nickname) > 12 {
 		return web.ErrNicknameLengthLimit
+	}
+	if words.Search.ContainsAny(req.Nickname) {
+		return web.ErrIllegalWords
 	}
 	user := req.User
 	user.Nickname = req.Nickname

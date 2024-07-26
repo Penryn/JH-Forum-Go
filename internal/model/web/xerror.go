@@ -103,4 +103,5 @@ var (
 
 	// 其他错误
 	ErrNotImplemented = xerror.NewError(10501, "功能未实现")
+	ErrIllegalWords   = xerror.NewError(10502, "包含非法词汇")
 )

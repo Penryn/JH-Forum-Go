@@ -22,6 +22,7 @@ import (
 	"JH-Forum/internal/model/web"
 	"JH-Forum/internal/servants/base"
 	"JH-Forum/internal/servants/chain"
+	"JH-Forum/pkg/sensitive/Words"
 	"JH-Forum/pkg/utils"
 	"JH-Forum/pkg/xerror"
 	"github.com/sirupsen/logrus"
@@ -234,6 +235,11 @@ func (s *privSrv) CreateTweet(req *web.CreateTweetReq) (_ *web.CreateTweetResp, 
 	}
 	mediaContents = contents
 	tags := tagsFrom(req.Tags)
+	for _, tag := range tags {
+		if words.Search.ContainsAny(tag) {
+			return nil, web.ErrIllegalWords
+		}
+	}
 	post := &ms.Post{
 		UserID:     req.User.ID,
 		Tags:       strings.Join(tags, ","),
@@ -257,7 +263,11 @@ func (s *privSrv) CreateTweet(req *web.CreateTweetReq) (_ *web.CreateTweetResp, 
 		if item.Type == ms.ContentTypeAttachment {
 			item.Type = ms.ContentTypeChargeAttachment
 		}
-
+		if words.Search.ContainsAny(item.Content) {
+			// 包含敏感词
+			logrus.Infof("contents has illegal words: %s", item.Content)
+			return nil, web.ErrIllegalWords
+		}
 		postContent := &ms.PostContent{
 			PostID:  post.ID,
 			UserID:  req.User.ID,
@@ -371,6 +381,11 @@ func (s *privSrv) CreateCommentReply(req *web.CreateCommentReplyReq) (_ *web.Cre
 
 	if post, comment, atUserID, err = s.createPostPreHandler(req.CommentID, req.Uid, req.AtUserID); err != nil {
 		return nil, web.ErrCreateReplyFailed
+	}
+
+	if words.Search.ContainsAny(req.Content) {
+		// 包含敏感词
+		return nil, web.ErrIllegalWords
 	}
 
 	// 创建评论
@@ -528,6 +543,10 @@ func (s *privSrv) CreateComment(req *web.CreateCommentReq) (_ *web.CreateComment
 			if err := s.Ds.CheckAttachment(item.Content); err != nil {
 				continue
 			}
+		}
+		if words.Search.ContainsAny(item.Content) {
+			// 包含敏感词
+			return nil, web.ErrIllegalWords
 		}
 		postContent := &ms.CommentContent{
 			CommentID: comment.ID,

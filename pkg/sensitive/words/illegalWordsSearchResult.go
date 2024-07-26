@@ -1,0 +1,21 @@
+// Tips: 敏感词搜索结果
+package words
+
+type IllegalWordsSearchResult struct {
+	Start         int
+	End           int
+	Keyword       string
+	BlacklistType int
+	SrcString     string
+}
+
+// NewIllegalWordsSearchResult 创建敏感词搜索结果
+func NewIllegalWordsSearchResult(keyword string, start int, end int, srcText string, _type int) *IllegalWordsSearchResult {
+	return &IllegalWordsSearchResult{
+		Start:         start,
+		End:           end,
+		Keyword:       keyword,
+		SrcString:     string([]rune(srcText)[start:end]),
+		BlacklistType: _type,
+	}
+}
