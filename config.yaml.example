@@ -62,7 +62,7 @@ MinIO: # MinIO 存储配置
   Secure: false
   Endpoint: minio:9000
   Bucket: jh-forum
-  Domain: 127.0.0.0 
+  Domain: 127.0.0.0:9000
 PprofServer: # Pprof服务
   RunMode: debug
   HttpIp: 127.0.0.1
